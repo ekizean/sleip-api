@@ -33,6 +33,16 @@ describe('Horses', () => {
     });
 
     it('should create a horse if user role is admin', async () => {
+      // Arrange
+      const ownerResponse = await request(app.getHttpServer())
+        .post('/v1/owners')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      const ownerId = ownerResponse.body.id;
+
       // Act
       const response = await request(app.getHttpServer())
         .post('/v1/horses')
@@ -42,7 +52,7 @@ describe('Horses', () => {
           age: 5,
           breed: 'Arabian',
           healthStatus: 'Healthy',
-          owner: 'owner123',
+          owner: ownerId,
         });
 
       // Assert
@@ -53,9 +63,26 @@ describe('Horses', () => {
         age: 5,
         breed: 'Arabian',
         healthStatus: 'Healthy',
-        owner: 'owner123',
+        owner: ownerId,
         createdAt: expect.any(String),
       });
+    });
+
+    it('should return 404 if owner does not exist', async () => {
+      // Act
+      const response = await request(app.getHttpServer())
+        .post('/v1/horses')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'Spirit',
+          age: 5,
+          breed: 'Arabian',
+          healthStatus: 'Healthy',
+          owner: 'non-existing-owner',
+        });
+
+      // Assert
+      expect(response.status).toBe(404);
     });
   });
 
@@ -73,12 +100,21 @@ describe('Horses', () => {
 
     it('should allow vet to get horses and filter by query params', async () => {
       // Arrange
+      const ownerResponse = await request(app.getHttpServer())
+        .post('/v1/owners')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      const ownerId = ownerResponse.body.id;
+
       const arabianHorse = {
         name: 'Spirit',
         age: 5,
         breed: 'Arabian',
         healthStatus: 'Healthy',
-        owner: 'owner123',
+        owner: ownerId,
       };
       await request(app.getHttpServer())
         .post('/v1/horses')
@@ -90,7 +126,7 @@ describe('Horses', () => {
         age: 7,
         breed: 'Tiger Horse',
         healthStatus: 'Healthy',
-        owner: 'owner123',
+        owner: ownerId,
       };
       await request(app.getHttpServer())
         .post('/v1/horses')
@@ -122,6 +158,15 @@ describe('Horses', () => {
   describe('PUT /v1/horses/:id', () => {
     it('should update a horse if user role is admin', async () => {
       // Arrange
+      const ownerResponse = await request(app.getHttpServer())
+        .post('/v1/owners')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      const ownerId = ownerResponse.body.id;
+
       const createResponse = await request(app.getHttpServer())
         .post('/v1/horses')
         .set('x-user-role', 'admin')
@@ -130,7 +175,7 @@ describe('Horses', () => {
           age: 7,
           breed: 'Thoroughbred',
           healthStatus: 'Healthy',
-          owner: 'owner123',
+          owner: ownerId,
         });
       const horseId = createResponse.body.id;
       const updateBody = { breed: 'Quarter Horse' };
@@ -175,6 +220,15 @@ describe('Horses', () => {
   describe('PATCH /v1/horses/:id/health', () => {
     it('should update healthStatus if user role is vet', async () => {
       // Arrange
+      const ownerResponse = await request(app.getHttpServer())
+        .post('/v1/owners')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      const ownerId = ownerResponse.body.id;
+
       const createResponse = await request(app.getHttpServer())
         .post('/v1/horses')
         .set('x-user-role', 'admin')
@@ -183,7 +237,7 @@ describe('Horses', () => {
           age: 6,
           breed: 'Mustang',
           healthStatus: 'Healthy',
-          owner: 'owner123',
+          owner: ownerId,
         });
       const horseId = createResponse.body.id;
       const updateBody = { healthStatus: 'Injured' };
@@ -231,6 +285,15 @@ describe('Horses', () => {
   describe('DELETE /v1/horses/:id', () => {
     it('should delete a horse if user role is admin', async () => {
       // Arrange
+      const ownerResponse = await request(app.getHttpServer())
+        .post('/v1/owners')
+        .set('x-user-role', 'admin')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+        });
+      const ownerId = ownerResponse.body.id;
+
       const createResponse = await request(app.getHttpServer())
         .post('/v1/horses')
         .set('x-user-role', 'admin')
@@ -239,7 +302,7 @@ describe('Horses', () => {
           age: 4,
           breed: 'Friesian',
           healthStatus: 'Healthy',
-          owner: 'owner123',
+          owner: ownerId,
         });
       const horseId = createResponse.body.id;
 

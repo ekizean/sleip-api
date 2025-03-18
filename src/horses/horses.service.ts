@@ -12,6 +12,12 @@ export class HorsesService {
   constructor(private firestore: Firestore) {}
 
   async createHorse(dto: CreateHorseDto): Promise<Horse> {
+    const ownerRef = this.firestore.collection('owners').doc(dto.owner);
+    const ownerSnap = await ownerRef.get();
+    if (!ownerSnap.exists) {
+      throw new NotFoundException(`Owner with id ${dto.owner} not found`);
+    }
+
     const createdAt = new Date().toISOString();
     const docRef = await this.firestore
       .collection(this.collectionName)

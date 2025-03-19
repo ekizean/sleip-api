@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  sleip-api:
+    build: .
+    container_name: sleip-api
+    ports:
+      - '${NEST_PORT:-3000}:3000'
+    environment:
+      FIRESTORE_EMULATOR_HOST: 'firestore-emulator:8080'
+      NEST_PORT: '${NEST_PORT:-3000}'
+      GCLOUD_PROJECT: 'sleip-api'
+    depends_on:
+      - firestore-emulator
+
+  firestore-emulator:
+    image: google/cloud-sdk:latest
+    container_name: firestore-emulator
+    command: gcloud emulators firestore start --host-port=0.0.0.0:8080
+    ports:
+      - '8080:8080'
